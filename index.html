@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cover Letter Generator - Jan Skaaden</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             max-width: 900px;
@@ -17,47 +15,17 @@
             color: #333;
             line-height: 1.6;
         }
-        h1 {
-            color: #1a1a1a;
-            margin-bottom: 8px;
-        }
-        .subtitle {
-            color: #666;
-            margin-bottom: 32px;
-        }
-        .step {
+        h1 { color: #1a1a1a; margin-bottom: 8px; }
+        .subtitle { color: #666; margin-bottom: 32px; }
+        .card {
             background: white;
             padding: 24px;
             border-radius: 12px;
             margin-bottom: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
-        .step h2 {
-            margin-top: 0;
-            color: #1a1a1a;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .step-number {
-            background: #2563eb;
-            color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 8px;
-            color: #444;
-        }
+        .card h2 { margin-top: 0; font-size: 18px; }
+        label { display: block; font-weight: 500; margin-bottom: 8px; color: #444; }
         textarea, input {
             width: 100%;
             padding: 12px;
@@ -65,18 +33,13 @@
             border-radius: 8px;
             font-size: 14px;
             font-family: inherit;
-            resize: vertical;
         }
         textarea:focus, input:focus {
             outline: none;
             border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
-        .small-inputs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
         button {
             background: #2563eb;
             color: white;
@@ -89,272 +52,261 @@
             width: 100%;
             transition: background 0.2s;
         }
-        button:hover {
-            background: #1d4ed8;
-        }
-        button:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-        }
-        .output {
-            background: white;
-            padding: 32px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        button:hover { background: #1d4ed8; }
+        .analysis {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
             display: none;
         }
-        .output.visible {
-            display: block;
+        .analysis.visible { display: block; }
+        .analysis h3 { margin: 0 0 12px 0; font-size: 14px; color: #0369a1; }
+        .tag {
+            display: inline-block;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin: 3px;
         }
-        .output h2 {
-            margin-top: 0;
-        }
+        .output { display: none; }
+        .output.visible { display: block; }
         #coverLetter {
             white-space: pre-wrap;
             font-family: inherit;
-            line-height: 1.7;
+            line-height: 1.8;
             background: #fafafa;
             padding: 24px;
             border-radius: 8px;
-            border: 1px solid #eee;
+            border: 1px solid #e5e7eb;
+            min-height: 300px;
         }
-        .copy-btn {
-            background: #059669;
-            margin-top: 16px;
+        #coverLetter[contenteditable]:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: white;
         }
-        .copy-btn:hover {
-            background: #047857;
-        }
-        .extracted {
-            background: #f0f9ff;
-            padding: 16px;
+        .actions { display: flex; gap: 12px; margin-top: 16px; }
+        .actions button { flex: 1; }
+        .copy-btn { background: #059669; }
+        .copy-btn:hover { background: #047857; }
+        .edit-hint { font-size: 13px; color: #666; margin-bottom: 8px; }
+        .structure-hint {
+            background: #fef3c7;
             border-radius: 8px;
-            margin: 16px 0;
-            border-left: 4px solid #2563eb;
-        }
-        .extracted h3 {
-            margin: 0 0 8px 0;
-            font-size: 14px;
-            color: #1e40af;
-        }
-        .extracted ul {
-            margin: 0;
-            padding-left: 20px;
-        }
-        .extracted li {
-            margin: 4px 0;
+            padding: 16px;
+            margin-bottom: 20px;
             font-size: 14px;
         }
-        .tip {
-            font-size: 13px;
-            color: #666;
-            margin-top: 8px;
-        }
-        .hidden {
-            display: none;
-        }
+        .structure-hint strong { color: #92400e; }
     </style>
 </head>
 <body>
     <h1>Cover Letter Generator</h1>
-    <p class="subtitle">Paste a job description and generate a tailored cover letter</p>
+    <p class="subtitle">Paste a job description → get a narrative cover letter (not a CV summary)</p>
 
-    <div class="step">
-        <h2><span class="step-number">1</span> Job Details</h2>
-        <div class="small-inputs">
+    <div class="structure-hint">
+        <strong>📝 This tool generates story-driven cover letters:</strong><br>
+        Hook (why this company) → Your angle (the pivot story) → Proof (one compelling example) → Fit (why you + them) → Confident close
+    </div>
+
+    <div class="card">
+        <h2>Job Details</h2>
+        <div class="row">
             <div>
-                <label for="company">Company Name</label>
+                <label for="company">Company Name *</label>
                 <input type="text" id="company" placeholder="e.g., Spotify">
             </div>
             <div>
-                <label for="role">Role Title</label>
+                <label for="role">Role Title *</label>
                 <input type="text" id="role" placeholder="e.g., Product Analyst">
+            </div>
+        </div>
+        <label for="jobDesc">Job Description *</label>
+        <textarea id="jobDesc" rows="12" placeholder="Paste the full job posting here..."></textarea>
+
+        <button onclick="generateLetter()" style="margin-top: 20px;">✨ Generate Cover Letter</button>
+
+        <div id="analysis" class="analysis">
+            <h3>🔍 Detected themes → Narrative approach:</h3>
+            <div id="narrativeApproach"></div>
+        </div>
+    </div>
+
+    <div id="output" class="output">
+        <div class="card">
+            <h2>Your Cover Letter</h2>
+            <p class="edit-hint">💡 Click the text to edit directly. This is a starting point—personalize it.</p>
+            <div id="coverLetter" contenteditable="true"></div>
+            <div class="actions">
+                <button class="copy-btn" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+                <button onclick="generateLetter()" style="background: #6366f1;">🔄 Regenerate</button>
             </div>
         </div>
     </div>
 
-    <div class="step">
-        <h2><span class="step-number">2</span> Job Description</h2>
-        <label for="jobDesc">Paste the full job posting</label>
-        <textarea id="jobDesc" rows="10" placeholder="Paste the job description here..."></textarea>
-        <button onclick="analyzeJob()" style="margin-top: 16px; background: #6366f1;">Analyze Job Posting</button>
-
-        <div id="extractedReqs" class="extracted hidden">
-            <h3>📋 Key Requirements Detected</h3>
-            <ul id="reqsList"></ul>
-        </div>
-    </div>
-
-    <div class="step">
-        <h2><span class="step-number">3</span> Why This Role?</h2>
-        <label for="whyRole">What specifically interests you about this role/company?</label>
-        <textarea id="whyRole" rows="3" placeholder="e.g., I'm drawn to Spotify's focus on experimentation and the scale of their product decisions. The emphasis on A/B testing aligns with my experience at Mytheresa..."></textarea>
-        <p class="tip">💡 Be specific: mention their product, mission, team, or something from the job posting that resonated.</p>
-    </div>
-
-    <div class="step">
-        <h2><span class="step-number">4</span> Which experience to highlight?</h2>
-        <label>Select 2-3 most relevant experiences for this role:</label>
-        <div id="experienceOptions" style="margin-top: 12px;">
-            <label style="display: flex; align-items: flex-start; gap: 8px; font-weight: normal; margin-bottom: 12px; cursor: pointer;">
-                <input type="checkbox" name="exp" value="kpi" style="width: auto; margin-top: 4px;">
-                <span><strong>KPI monitoring & anomaly detection</strong> — surfacing issues to help product/engineering prioritize fixes based on revenue and UX impact (Mytheresa)</span>
-            </label>
-            <label style="display: flex; align-items: flex-start; gap: 8px; font-weight: normal; margin-bottom: 12px; cursor: pointer;">
-                <input type="checkbox" name="exp" value="problem-framing" style="width: auto; margin-top: 4px;">
-                <span><strong>Problem framing & prioritization</strong> — framing customer/system issues as clear problem statements, estimating impact to help prioritize fixes (Mytheresa)</span>
-            </label>
-            <label style="display: flex; align-items: flex-start; gap: 8px; font-weight: normal; margin-bottom: 12px; cursor: pointer;">
-                <input type="checkbox" name="exp" value="ab-testing" style="width: auto; margin-top: 4px;">
-                <span><strong>A/B testing & experimentation</strong> — running tests to validate hypotheses, presenting trade-offs to help stakeholders decide what to ship (Mytheresa)</span>
-            </label>
-            <label style="display: flex; align-items: flex-start; gap: 8px; font-weight: normal; margin-bottom: 12px; cursor: pointer;">
-                <input type="checkbox" name="exp" value="uat" style="width: auto; margin-top: 4px;">
-                <span><strong>UAT & release validation</strong> — defining test scenarios and acceptance criteria to ensure business requirements met before shipping (Mytheresa)</span>
-            </label>
-            <label style="display: flex; align-items: flex-start; gap: 8px; font-weight: normal; margin-bottom: 12px; cursor: pointer;">
-                <input type="checkbox" name="exp" value="campaign-analysis" style="width: auto; margin-top: 4px;">
-                <span><strong>Campaign performance analysis</strong> — measuring ROI and conversion uplift to help decide which initiatives to scale or cut (Bang & Olufsen)</span>
-            </label>
-            <label style="display: flex; align-items: flex-start; gap: 8px; font-weight: normal; margin-bottom: 12px; cursor: pointer;">
-                <input type="checkbox" name="exp" value="stakeholder" style="width: auto; margin-top: 4px;">
-                <span><strong>Cross-regional stakeholder partnership</strong> — aligning data insights with local strategy across 5+ markets (Bang & Olufsen)</span>
-            </label>
-            <label style="display: flex; align-items: flex-start; gap: 8px; font-weight: normal; margin-bottom: 12px; cursor: pointer;">
-                <input type="checkbox" name="exp" value="cx-analysis" style="width: auto; margin-top: 4px;">
-                <span><strong>Customer experience analysis</strong> — identifying friction points, quantifying impact, translating into prioritized recommendations (Bang & Olufsen)</span>
-            </label>
-            <label style="display: flex; align-items: flex-start; gap: 8px; font-weight: normal; margin-bottom: 12px; cursor: pointer;">
-                <input type="checkbox" name="exp" value="csat" style="width: auto; margin-top: 4px;">
-                <span><strong>CSAT improvement</strong> — leveraging feedback to identify systemic gaps, driving changes that increased CSAT from 65% to 85% (Bang & Olufsen)</span>
-            </label>
-            <label style="display: flex; align-items: flex-start; gap: 8px; font-weight: normal; margin-bottom: 12px; cursor: pointer;">
-                <input type="checkbox" name="exp" value="product-launch" style="width: auto; margin-top: 4px;">
-                <span><strong>Product launch coordination</strong> — led introduction of "Reloved" refurbished platform, coordinating ops, commercial, and experience (Bang & Olufsen)</span>
-            </label>
-            <label style="display: flex; align-items: flex-start; gap: 8px; font-weight: normal; margin-bottom: 12px; cursor: pointer;">
-                <input type="checkbox" name="exp" value="retention" style="width: auto; margin-top: 4px;">
-                <span><strong>User retention research</strong> — researched behavior to support adoption strategy during free-to-paid transition (reMarkable)</span>
-            </label>
-        </div>
-    </div>
-
-    <div class="step">
-        <button onclick="generateLetter()">Generate Cover Letter</button>
-    </div>
-
-    <div id="output" class="output">
-        <h2>Your Cover Letter</h2>
-        <div id="coverLetter"></div>
-        <button class="copy-btn" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
-    </div>
-
     <script>
-        // Experience mapping
-        const experiences = {
-            "kpi": "At Mytheresa, I own KPI monitoring and anomaly detection—surfacing issues that help product and engineering prioritize fixes based on revenue and UX impact.",
-            "problem-framing": "At Mytheresa, I support product teams by framing customer and system issues as clear problem statements, estimating impact, and helping prioritize what to fix across digital products.",
-            "ab-testing": "At Mytheresa, I run A/B tests to validate optimization hypotheses, presenting results and trade-offs to help stakeholders decide which changes to ship.",
-            "uat": "At Mytheresa, I lead UAT for feature releases, defining test scenarios and acceptance criteria that ensure business requirements are met before shipping.",
-            "campaign-analysis": "At Bang & Olufsen, I owned performance analysis for global campaigns, measuring ROI and conversion uplift to help commercial teams decide which initiatives to scale or cut.",
-            "stakeholder": "At Bang & Olufsen, I partnered with market heads across 5+ regions to align data insights with local strategy—bridging analytics and commercial decision-making.",
-            "cx-analysis": "At Bang & Olufsen, I analysed the end-to-end customer experience to identify friction points, quantify impact, and translate findings into prioritized recommendations.",
-            "csat": "At Bang & Olufsen, I leveraged customer feedback to identify systemic experience gaps, driving aligned changes that increased CSAT from 65% to 85%.",
-            "product-launch": "At Bang & Olufsen, I led the introduction of a refurbished products platform, coordinating operational, commercial, and experience considerations to establish a new capability.",
-            "retention": "At reMarkable, I researched user behavior to support the adoption and retention strategy during the company's transition from free to paid cloud service."
+        // =====================================================================
+        // NARRATIVE BUILDING BLOCKS
+        // =====================================================================
+
+        // HOOKS - Opening lines that reference the company/role specifically
+        const hooks = {
+            experimentation: [
+                "What caught my attention about {company} is the emphasis on experimentation—not just running tests, but building a culture where decisions are validated before resources are committed.",
+                "I noticed {company} treats experimentation as core to how product decisions get made, not just a nice-to-have. That's rare, and it's exactly the environment I'm looking for."
+            ],
+            growth: [
+                "Growth roles often end up being about dashboards and reporting. What stands out about this {role} position is that it seems to be about actually shaping what gets built.",
+                "I've been looking for a growth role where the work goes beyond tracking metrics—where there's real ownership over what to try next. This role at {company} looks like that."
+            ],
+            product: [
+                "I've spent four years working adjacent to product decisions—analyzing the data that informs them, validating features before they ship, measuring whether they worked. I'm ready to own more of the decision-making itself.",
+                "What draws me to this role is the chance to be closer to the 'what should we build' question, not just the 'how did it perform' question."
+            ],
+            cx: [
+                "I've always believed that good analytics should ultimately improve how people experience a product. This {role} role at {company} seems to share that philosophy.",
+                "What resonates about {company}'s approach is the focus on customer experience as a driver of decisions, not just a metric to report on."
+            ],
+            startup: [
+                "I'm drawn to {company} because the stage you're at means decisions actually move fast—and the person in this role will have real impact on what gets prioritized.",
+                "What excites me about {company} is the opportunity to wear multiple hats and have direct impact, rather than being one analyst among many."
+            ],
+            remote: [
+                "I've been looking for a remote role where collaboration still feels tight—where async work is intentional, not just tolerated. {company} seems to get this right.",
+            ],
+            default: [
+                "I came across this {role} role at {company} and it felt like a fit worth pursuing—not just because of the responsibilities, but because of where it sits: at the intersection of data and product decisions.",
+            ]
         };
 
-        // Analyze job posting
-        function analyzeJob() {
-            const jobDesc = document.getElementById('jobDesc').value.toLowerCase();
-            const reqs = [];
+        // PIVOT STORY - The narrative of why you're transitioning
+        const pivotStories = {
+            pm: "For the past four years, I've been the person who helps product teams figure out what's broken and what to prioritize. I've built the analytical foundation for decisions—but increasingly, I want to own the decisions themselves. This role feels like the right next step.",
+            analyst: "I've spent four years in ecommerce, working across the full stack of product analytics—funnels, experimentation, tracking, KPIs. What I've learned is that I'm most energized when my analysis actually changes what gets built. That's the kind of impact I'm looking for in this role.",
+            growth: "My background is in ecommerce analytics and product operations. I've worked on the measurement side of growth—figuring out what's working, what's not, and where to focus. Now I want to be closer to the levers, not just the metrics.",
+            ops: "I've worked in product operations and analytics, which means I've seen how decisions get made—and how often they're made without the right data. I want to be in a role where I can bridge that gap more directly."
+        };
 
-            // Pattern matching for common requirements
-            const patterns = [
-                { regex: /a\/b test|experimentation|experiment/i, label: "A/B testing & experimentation" },
-                { regex: /sql|query|database/i, label: "SQL / data querying" },
-                { regex: /stakeholder|cross-functional|collaborate/i, label: "Stakeholder management" },
-                { regex: /product manager|pm|product team/i, label: "Product team collaboration" },
-                { regex: /kpi|metrics|dashboard|reporting/i, label: "KPIs & reporting" },
-                { regex: /funnel|conversion|user journey/i, label: "Funnel / conversion analysis" },
-                { regex: /prioriti[sz]/i, label: "Prioritization" },
-                { regex: /roadmap/i, label: "Roadmap input" },
-                { regex: /insight|recommendation/i, label: "Translating data into recommendations" },
-                { regex: /customer experience|user experience|ux/i, label: "User/customer experience" },
-                { regex: /growth/i, label: "Growth focus" },
-                { regex: /ecommerce|e-commerce/i, label: "Ecommerce experience" },
-            ];
+        // PROOF POINTS - Compelling examples (not CV bullets)
+        const proofPoints = {
+            experimentation: "At Mytheresa, I've run A/B tests where the 'obvious' winner turned out to be wrong once we looked at downstream behavior. Learning to present those trade-offs clearly—so stakeholders trust the process even when results are counterintuitive—has been one of the most valuable skills I've developed.",
+            funnel: "At Mytheresa, I own the process of investigating funnel anomalies. When conversion drops, I'm the one figuring out whether it's a bug, a tracking issue, or a real behavior change. That detective work—and knowing how to prioritize what to fix—is something I'd bring to {company}.",
+            prioritization: "One thing I've gotten good at is framing problems clearly for product teams. When there are ten things that could be fixed, I help figure out which two actually matter. That usually means quantifying impact, but also understanding what the team can realistically ship.",
+            stakeholder: "At Bang & Olufsen, I worked with market heads across five regions who all had different priorities. I learned to translate data into language that made sense for each audience—and to push back when the data didn't support what someone wanted to hear.",
+            cx: "At Bang & Olufsen, I led a project analyzing customer feedback across touchpoints. We found patterns that weren't obvious from the quantitative data alone—and fixing them moved CSAT from 65% to 85%. That mix of qual and quant is something I'd bring to this role.",
+            launch: "I led the operational side of launching Bang & Olufsen's refurbished products platform. It meant coordinating across commercial, ops, and experience teams—and learning that successful launches are as much about alignment as execution.",
+            retention: "At reMarkable, I worked on the transition from free to paid cloud service. That meant understanding why users stayed or left, and helping shape the retention strategy. It was my first real exposure to product thinking, and it stuck with me.",
+            default: "In my current role at Mytheresa, I've become the person teams come to when they need to understand what's happening in the funnel and what to do about it. I want to take that skill set somewhere it can have broader impact."
+        };
 
-            patterns.forEach(p => {
-                if (p.regex.test(jobDesc)) {
-                    reqs.push(p.label);
-                }
-            });
+        // FIT STATEMENTS - Why you + them specifically
+        const fitStatements = {
+            experimentation: "I'd bring a rigorous approach to experimentation—not just running tests, but making sure the organization learns from them and trusts the results.",
+            growth: "I'd bring a mindset focused on finding leverage: what's the smallest change that moves the biggest metric? And how do we validate that before going all-in?",
+            product: "I'd bring an analytical foundation to product thinking—the ability to frame problems clearly, quantify trade-offs, and separate signal from noise.",
+            cx: "I'd bring a habit of connecting data to customer experience—always asking 'what does this mean for the person using the product?'",
+            stakeholder: "I'd bring experience bridging data and business teams—translating insights into language that drives action, not just reports that get filed away.",
+            default: "I'd bring structured thinking, a bias toward clarity, and four years of pattern recognition from ecommerce—knowing what tends to matter and what tends to be noise."
+        };
 
-            if (reqs.length > 0) {
-                document.getElementById('extractedReqs').classList.remove('hidden');
-                document.getElementById('reqsList').innerHTML = reqs.map(r => `<li>${r}</li>`).join('');
-            }
+        // =====================================================================
+        // DETECTION & GENERATION
+        // =====================================================================
+
+        function detectThemes(jobDesc) {
+            const jd = jobDesc.toLowerCase();
+            const themes = [];
+
+            if (/experiment|a\/b test|hypothesis|test and learn/.test(jd)) themes.push('experimentation');
+            if (/growth|acquisition|retention|conversion/.test(jd)) themes.push('growth');
+            if (/product manager|roadmap|backlog|product team/.test(jd)) themes.push('product');
+            if (/customer experience|user experience|ux|csat|nps|friction/.test(jd)) themes.push('cx');
+            if (/startup|series [a-c]|early stage|fast-paced/.test(jd)) themes.push('startup');
+            if (/remote|distributed/.test(jd)) themes.push('remote');
+            if (/funnel|drop-off|checkout|conversion rate/.test(jd)) themes.push('funnel');
+            if (/prioriti|trade-off|impact|backlog/.test(jd)) themes.push('prioritization');
+            if (/stakeholder|cross-functional|executive|present/.test(jd)) themes.push('stakeholder');
+            if (/launch|go-to-market|rollout/.test(jd)) themes.push('launch');
+
+            return themes.length > 0 ? themes : ['default'];
         }
 
-        // Generate cover letter
+        function pickRandom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
         function generateLetter() {
-            const company = document.getElementById('company').value || '[Company]';
-            const role = document.getElementById('role').value || '[Role Title]';
-            const whyRole = document.getElementById('whyRole').value;
-            const jobDesc = document.getElementById('jobDesc').value;
+            const company = document.getElementById('company').value.trim();
+            const role = document.getElementById('role').value.trim();
+            const jobDesc = document.getElementById('jobDesc').value.trim();
 
-            // Get selected experiences
-            const selected = Array.from(document.querySelectorAll('input[name="exp"]:checked'))
-                .map(cb => experiences[cb.value]);
-
-            if (selected.length === 0) {
-                alert('Please select at least one experience to highlight.');
+            if (!company || !role || !jobDesc) {
+                alert('Please fill in company name, role title, and job description.');
                 return;
             }
 
+            const themes = detectThemes(jobDesc);
+            const primaryTheme = themes[0];
+            const secondaryTheme = themes[1] || themes[0];
+
+            // Show what we detected
+            document.getElementById('analysis').classList.add('visible');
+            document.getElementById('narrativeApproach').innerHTML = `
+                <span class="tag">Primary: ${primaryTheme}</span>
+                <span class="tag">Secondary: ${secondaryTheme}</span>
+                <br><br>
+                <small>Using: ${primaryTheme} hook → pivot story → ${secondaryTheme} proof point → ${primaryTheme} fit statement</small>
+            `;
+
+            // Determine pivot story type based on role
+            let pivotType = 'analyst';
+            if (/product manager|product owner/i.test(role)) pivotType = 'pm';
+            else if (/growth/i.test(role)) pivotType = 'growth';
+            else if (/operations|ops/i.test(role)) pivotType = 'ops';
+
             // Build the letter
-            let experiencePara = selected.join(' ');
+            const hookOptions = hooks[primaryTheme] || hooks.default;
+            const hook = pickRandom(hookOptions)
+                .replace('{company}', company)
+                .replace('{role}', role);
 
-            // Create "why this role" paragraph
-            let whyPara = '';
-            if (whyRole.trim()) {
-                whyPara = whyRole.trim();
-            } else {
-                whyPara = `What draws me to this role is the opportunity to apply my experience in a more product-focused context at ${company}.`;
-            }
+            const pivot = pivotStories[pivotType];
 
-            // Detect if role is more PM or analyst leaning
-            const isPM = /product manager|product owner/i.test(role) || /roadmap|backlog/i.test(jobDesc);
-            const closingAngle = isPM
-                ? "I'm looking to move closer to owning product decisions, and this role feels like the right next step."
-                : "I'm looking to deepen my impact on product direction through analytics, and this role aligns well with that goal.";
+            const proofTheme = themes.find(t => proofPoints[t]) || 'default';
+            const proof = (proofPoints[proofTheme] || proofPoints.default)
+                .replace('{company}', company);
 
+            const fit = (fitStatements[primaryTheme] || fitStatements.default);
+
+            // Assemble with narrative flow
             const letter = `Dear Hiring Team,
 
-I'm writing about the ${role} position at ${company}. I have 4+ years of experience in product operations and ecommerce—spanning user journeys, experimentation, and tracking quality—focused on helping teams make better decisions with data.
+${hook}
 
-${whyPara}
+${pivot}
 
-${experiencePara}
+${proof}
 
-${closingAngle}
+${fit}
 
-I'd welcome the chance to discuss how my background could contribute to your team.
+I'd be glad to discuss how my background fits what you're building at ${company}.
 
-Best regards,
+Best,
 Jan Skaaden
 janskaaden@gmail.com | +34 663 471 415
 linkedin.com/in/janskaaden`;
 
-            document.getElementById('coverLetter').textContent = letter;
+            document.getElementById('coverLetter').innerText = letter;
             document.getElementById('output').classList.add('visible');
             document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Copy to clipboard
         function copyToClipboard() {
-            const text = document.getElementById('coverLetter').textContent;
+            const text = document.getElementById('coverLetter').innerText;
             navigator.clipboard.writeText(text).then(() => {
                 const btn = document.querySelector('.copy-btn');
                 btn.textContent = '✓ Copied!';
