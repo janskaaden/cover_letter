@@ -42,7 +42,6 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-        .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
         button {
             background: #2563eb;
             color: white;
@@ -57,10 +56,7 @@
         }
         button:hover { background: #1d4ed8; }
         button:disabled { background: #94a3b8; cursor: wait; }
-        .btn-small {
-            padding: 10px 16px;
-            font-size: 14px;
-        }
+        .btn-small { padding: 10px 16px; font-size: 14px; }
         .btn-green { background: #059669; }
         .btn-green:hover { background: #047857; }
         .btn-purple { background: #6366f1; }
@@ -103,16 +99,6 @@
         .actions { display: flex; gap: 12px; margin-top: 16px; }
         .actions button { flex: 1; }
         .edit-hint { font-size: 13px; color: #666; margin-bottom: 8px; }
-        .fetch-status {
-            font-size: 13px;
-            margin-top: 10px;
-            padding: 10px 14px;
-            border-radius: 6px;
-            display: none;
-        }
-        .fetch-status.loading { display: block; background: #dbeafe; color: #1e40af; }
-        .fetch-status.success { display: block; background: #dcfce7; color: #166534; }
-        .fetch-status.error { display: block; background: #fee2e2; color: #991b1b; }
         .guidelines {
             background: #f0fdf4;
             border: 1px solid #bbf7d0;
@@ -123,30 +109,30 @@
         }
         .guidelines strong { color: #166534; }
         .guidelines ul { margin: 8px 0 0 0; padding-left: 20px; color: #15803d; }
-        .fetch-tip {
-            background: #dbeafe;
-            border-radius: 6px;
-            padding: 12px;
+        .fetch-status {
             font-size: 13px;
-            color: #1e40af;
-            margin-top: 12px;
+            margin-top: 10px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            display: none;
         }
-        .fetch-tip strong { display: block; margin-bottom: 4px; }
+        .fetch-status.loading { display: block; background: #dbeafe; color: #1e40af; }
+        .fetch-status.success { display: block; background: #dcfce7; color: #166534; }
+        .fetch-status.error { display: block; background: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body>
     <h1>Cover Letter Generator</h1>
-    <p class="subtitle">Narrative-driven cover letters that interpret your experience, not repeat it</p>
+    <p class="subtitle">Direct, human cover letters that win interviews</p>
 
     <div class="guidelines">
-        <strong>✓ This tool follows these principles:</strong>
+        <strong>✓ What this generates:</strong>
         <ul>
-            <li>Sharp opening—no filler introductions</li>
-            <li>Connects your experience to their actual problems, not just stated skills</li>
-            <li>Specific examples and outcomes, not buzzwords</li>
-            <li>Explains fit even when title isn't a perfect match</li>
-            <li>Written for a skeptical reader with 60 seconds</li>
-            <li>No "passionate," "results-driven," "excited to apply," or corporate fluff</li>
+            <li>Short paragraphs, direct sentences</li>
+            <li>One specific example with a real outcome</li>
+            <li>Clear value proposition (what they get)</li>
+            <li>Confident close, no groveling</li>
+            <li>No "passionate," "excited to apply," or corporate fluff</li>
         </ul>
     </div>
 
@@ -175,9 +161,9 @@
     </div>
 
     <div class="card">
-        <h2>3. Company Context <span class="label-hint">(paste from their website)</span></h2>
-        <label for="companyContext">What does the company do? Mission, product, stage, culture...</label>
-        <textarea id="companyContext" rows="4" placeholder="Paste from their About page, e.g.: 'We're a Series B fintech building spending analytics for SMBs. Our mission is to help small businesses understand their cash flow...'"></textarea>
+        <h2>3. Company Context <span class="label-hint">(auto-filled or paste manually)</span></h2>
+        <label for="companyContext">What does the company do?</label>
+        <textarea id="companyContext" rows="3" placeholder="e.g., EdTech marketplace connecting students with tutors. Series C, 500 employees..."></textarea>
     </div>
 
     <div class="card">
@@ -185,17 +171,17 @@
     </div>
 
     <div id="inference" class="inference">
-        <h3>🧠 Before writing, here's my read on this role:</h3>
+        <h3>🧠 Reading between the lines:</h3>
         <div class="inference-section">
-            <strong>What this role actually values (beyond the bullet points)</strong>
+            <strong>What they actually want</strong>
             <p id="inferValues"></p>
         </div>
         <div class="inference-section">
-            <strong>Problems this hire is likely meant to solve</strong>
+            <strong>Problems this hire solves</strong>
             <p id="inferProblems"></p>
         </div>
         <div class="inference-section">
-            <strong>Why your background fits (the non-obvious angle)</strong>
+            <strong>Your angle</strong>
             <p id="inferFit"></p>
         </div>
     </div>
@@ -203,7 +189,7 @@
     <div id="output" class="output">
         <div class="card">
             <h2>Your Cover Letter</h2>
-            <p class="edit-hint">💡 Click to edit. This is a strong draft—personalize details you know better.</p>
+            <p class="edit-hint">💡 Click to edit. Add any specific details you know.</p>
             <div id="coverLetter" contenteditable="true"></div>
             <div class="actions">
                 <button class="btn-green" onclick="copyToClipboard()">📋 Copy</button>
@@ -231,184 +217,92 @@
 
             btn.disabled = true;
             status.className = 'fetch-status loading';
-            status.textContent = `Searching Wikipedia for "${company}"...`;
+            status.textContent = `Searching for "${company}"...`;
 
             try {
-                // Step 1: Search Wikipedia for the company
                 const searchUrl = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(company)}&limit=5&namespace=0&format=json&origin=*`;
-
                 const searchResponse = await fetch(searchUrl);
                 const searchData = await searchResponse.json();
 
-                // searchData format: [query, [titles], [descriptions], [urls]]
                 const titles = searchData[1];
+                if (!titles || titles.length === 0) throw new Error('Not found');
 
-                if (!titles || titles.length === 0) {
-                    throw new Error('No Wikipedia page found');
-                }
-
-                // Find the best match (prefer exact match or one with "company" in description)
                 let bestTitle = titles[0];
                 const descriptions = searchData[2];
 
                 for (let i = 0; i < titles.length; i++) {
                     const desc = (descriptions[i] || '').toLowerCase();
-                    const title = titles[i].toLowerCase();
-                    if (title === company.toLowerCase() ||
-                        desc.includes('company') ||
-                        desc.includes('corporation') ||
-                        desc.includes('startup') ||
-                        desc.includes('software') ||
-                        desc.includes('technology')) {
+                    if (desc.includes('company') || desc.includes('corporation') || desc.includes('software') || desc.includes('technology')) {
                         bestTitle = titles[i];
                         break;
                     }
                 }
 
-                status.textContent = `Found "${bestTitle}", fetching details...`;
-
-                // Step 2: Get the page summary
                 const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(bestTitle)}`;
-
                 const summaryResponse = await fetch(summaryUrl);
-
-                if (!summaryResponse.ok) {
-                    throw new Error('Could not fetch page summary');
-                }
+                if (!summaryResponse.ok) throw new Error('Failed');
 
                 const summaryData = await summaryResponse.json();
-
-                // Extract useful information
                 let companyInfo = summaryData.extract || '';
-
-                // Add description if available
                 if (summaryData.description) {
-                    companyInfo = summaryData.description + '.\n\n' + companyInfo;
+                    companyInfo = summaryData.description + '. ' + companyInfo;
                 }
 
-                if (companyInfo.length < 50) {
-                    throw new Error('Not enough information found');
-                }
+                if (companyInfo.length > 1200) companyInfo = companyInfo.substring(0, 1200) + '...';
 
-                // Truncate if too long
-                if (companyInfo.length > 1500) {
-                    companyInfo = companyInfo.substring(0, 1500) + '...';
-                }
-
-                // Fill in the company context
                 document.getElementById('companyContext').value = companyInfo;
-
                 status.className = 'fetch-status success';
-                status.textContent = `✓ Found info for "${bestTitle}". Review and edit if needed.`;
+                status.textContent = `✓ Found "${bestTitle}"`;
 
             } catch (error) {
                 status.className = 'fetch-status error';
-                status.textContent = `Could not find "${company}" on Wikipedia. Try a different company name spelling, or paste info manually.`;
+                status.textContent = `Couldn't find "${company}" on Wikipedia. Try different spelling or paste info manually.`;
             }
 
             btn.disabled = false;
         }
 
         // =====================================================================
-        // INFERENCE ENGINE - What does this role actually need?
+        // INFERENCE ENGINE
         // =====================================================================
 
         function inferRoleNeeds(jobDesc, companyContext, role) {
             const jd = jobDesc.toLowerCase();
             const ctx = companyContext.toLowerCase();
-            const combined = jd + ' ' + ctx;
 
-            // Infer what they actually value
             let values = [];
-            if (/experiment|a\/b|test|hypothesis|data-driven|validate/.test(jd)) {
-                values.push("evidence-based decision making over intuition");
-            }
-            if (/growth|acquisition|retention|funnel|conversion/.test(jd)) {
-                values.push("measurable impact on business metrics");
-            }
-            if (/stakeholder|cross-functional|align|communicate|present/.test(jd)) {
-                values.push("ability to influence without authority");
-            }
-            if (/prioriti|trade-off|focus|backlog|roadmap/.test(jd)) {
-                values.push("someone who can say no and explain why");
-            }
-            if (/fast|move quickly|startup|scrappy|wear many hats/.test(combined)) {
-                values.push("bias toward action over perfect analysis");
-            }
-            if (/scale|growth stage|series [b-d]/.test(combined)) {
-                values.push("building processes that work at scale, not just firefighting");
-            }
-            if (/customer|user|experience|feedback/.test(jd)) {
-                values.push("connecting data to real user behavior");
-            }
-            if (/ambiguity|undefined|figure out|own/.test(jd)) {
-                values.push("comfort with ambiguity and self-direction");
-            }
-            if (values.length === 0) {
-                values.push("someone who can translate data into decisions");
-            }
+            if (/experiment|a\/b|test|data-driven/.test(jd)) values.push("decisions backed by data, not gut");
+            if (/growth|acquisition|retention/.test(jd)) values.push("measurable impact on metrics");
+            if (/stakeholder|cross-functional/.test(jd)) values.push("influence without authority");
+            if (/prioriti|trade-off|focus/.test(jd)) values.push("ability to say no with evidence");
+            if (/fast|startup|scrappy/.test(jd + ctx)) values.push("bias to action");
+            if (values.length === 0) values.push("someone who turns data into decisions");
 
-            // Infer problems they're trying to solve
             let problems = [];
-            if (/growth|conversion|funnel|drop-off/.test(jd)) {
-                problems.push("conversion or growth has stalled and they need someone to diagnose why");
-            }
-            if (/experiment|a\/b|test/.test(jd)) {
-                problems.push("they're running experiments but not learning from them systematically");
-            }
-            if (/prioriti|backlog|roadmap|focus/.test(jd)) {
-                problems.push("too many ideas, not enough clarity on what to build next");
-            }
-            if (/stakeholder|align|cross-functional/.test(jd)) {
-                problems.push("teams are making decisions in silos without shared data");
-            }
-            if (/new|build|establish|first/.test(jd)) {
-                problems.push("they're building this function from scratch or early stage");
-            }
-            if (/scale|process|operationalize/.test(jd)) {
-                problems.push("what worked at smaller scale is breaking down");
-            }
-            if (problems.length === 0) {
-                problems.push("they need someone to connect product decisions to measurable outcomes");
-            }
+            if (/growth|conversion|funnel/.test(jd)) problems.push("growth has stalled, need diagnosis");
+            if (/experiment|a\/b/.test(jd)) problems.push("running tests but not learning systematically");
+            if (/prioriti|roadmap/.test(jd)) problems.push("too many ideas, not enough focus");
+            if (/stakeholder|align/.test(jd)) problems.push("teams making decisions in silos");
+            if (problems.length === 0) problems.push("need someone to connect data to action");
 
-            // Infer why Jan's background fits
             let fit = [];
-            const isPM = /product manager|product owner/i.test(role);
+            const isPM = /product manager/i.test(role);
             const isGrowth = /growth/i.test(role);
-            const isAnalyst = /analyst/i.test(role);
-
-            if (isPM) {
-                fit.push("Your analytics background means you won't just make decisions—you'll make defensible ones backed by data. Many PMs lack this.");
-            }
-            if (isGrowth) {
-                fit.push("You've worked on the measurement side of growth. You know what actually moves metrics vs. what just looks good in a presentation.");
-            }
-            if (isAnalyst) {
-                fit.push("Your product operations experience means you understand the context decisions get made in—not just the numbers, but the constraints.");
-            }
-            if (/ecommerce|e-commerce|retail/.test(combined)) {
-                fit.push("Direct ecommerce experience at Mytheresa and B&O—you've seen high-stakes funnels where small changes have real revenue impact.");
-            }
-            if (/experiment|a\/b/.test(jd)) {
-                fit.push("You've run experiments where the 'obvious' answer was wrong—and learned to present counterintuitive findings persuasively.");
-            }
-            if (/stakeholder|cross-functional/.test(jd)) {
-                fit.push("You've worked across 5+ regional markets with competing priorities. You know how to build alignment, not just present data.");
-            }
-            if (fit.length === 0) {
-                fit.push("Your background sits at the intersection of analytics and product—you understand both the numbers and the decisions they inform.");
-            }
+            if (isPM) fit.push("Analytics background = decisions with evidence, not just instinct");
+            if (isGrowth) fit.push("You know what actually moves metrics vs. what looks good in decks");
+            if (/ecommerce/.test(jd + ctx)) fit.push("Direct ecommerce experience at luxury brands");
+            if (/experiment/.test(jd)) fit.push("You've defended counterintuitive test results");
+            if (fit.length === 0) fit.push("Four years connecting data to decisions in ecommerce");
 
             return {
-                values: values.slice(0, 3).join("; "),
+                values: values.slice(0, 2).join("; "),
                 problems: problems.slice(0, 2).join("; "),
-                fit: fit.slice(0, 2).join(" ")
+                fit: fit.slice(0, 2).join(". ")
             };
         }
 
         // =====================================================================
-        // LETTER GENERATION - Narrative, not CV
+        // LETTER GENERATION - Human, direct, no AI-speak
         // =====================================================================
 
         function generateLetter() {
@@ -423,95 +317,83 @@
             }
 
             const jd = jobDesc.toLowerCase();
-
-            // Generate inference
-            const inference = inferRoleNeeds(jobDesc, companyContext, role);
+            const ctx = companyContext.toLowerCase();
 
             // Show inference
+            const inference = inferRoleNeeds(jobDesc, companyContext, role);
             document.getElementById('inference').classList.add('visible');
             document.getElementById('inferValues').textContent = inference.values;
             document.getElementById('inferProblems').textContent = inference.problems;
             document.getElementById('inferFit').textContent = inference.fit;
 
-            // Determine role type for narrative angle
+            // Detect role type and themes
             const isPM = /product manager|product owner/i.test(role);
             const isGrowth = /growth/i.test(role);
+            const isMarketing = /marketing/i.test(role);
+            const isAnalyst = /analyst/i.test(role);
+
+            const hasExperimentation = /experiment|a\/b|test|hypothesis/.test(jd);
+            const hasStakeholders = /stakeholder|cross-functional|collaborate/.test(jd);
+            const hasFunnel = /funnel|conversion|drop-off|journey/.test(jd);
+            const hasPrioritization = /prioriti|roadmap|backlog|trade-off/.test(jd);
+            const hasCX = /customer experience|csat|nps|feedback/.test(jd);
 
             // =====================================================================
-            // BUILD THE LETTER - Section by section
+            // BUILD LETTER - Short paragraphs, direct language
             // =====================================================================
 
-            // OPENING: Sharp, specific, no filler
-            let opening = '';
-            if (/experiment|a\/b|test/.test(jd)) {
-                opening = `The ${role} role at ${company} caught my attention because it seems to treat experimentation as a core competency, not a checkbox. That's the environment I work best in—where decisions get validated before resources get committed.`;
-            } else if (isGrowth) {
-                opening = `Most growth roles are really reporting roles with a better title. This one at ${company} looks different—it seems to involve actual ownership of what gets tried and why. That's what I'm looking for.`;
+            let paragraphs = [];
+
+            // OPENER: Show relevance immediately
+            if (hasExperimentation) {
+                paragraphs.push(`Four years of running experiments in ecommerce. At Mytheresa, I own A/B testing and funnel analytics. At Bang & Olufsen, I measured what drove conversion across five markets. The ${role} role at ${company} looks like a place where that experience matters.`);
+            } else if (isGrowth || isMarketing) {
+                paragraphs.push(`Four years in ecommerce taught me what actually moves growth metrics. At Bang & Olufsen, I helped commercial teams across five regions figure out which campaigns to scale and which to cut. At Mytheresa, I run funnel analytics and experimentation. That's the experience I'd bring to ${company}.`);
             } else if (isPM) {
-                opening = `I've spent four years building the analytical foundation for product decisions. Now I want to own more of the decisions themselves. The ${role} role at ${company} looks like the right place to make that shift.`;
-            } else if (/stakeholder|cross-functional/.test(jd)) {
-                opening = `What stood out about this ${role} role is the emphasis on working across teams—not just producing analysis, but making sure it actually influences what gets built. That's where I've had the most impact in my career.`;
-            } else if (companyContext && /series [a-c]|startup|early/.test(companyContext.toLowerCase())) {
-                opening = `I'm drawn to ${company} because of the stage you're at—where the person in this role will shape how decisions get made, not just execute an existing playbook.`;
+                paragraphs.push(`Four years as the analytics person in the room when product teams decide what to build. At Mytheresa, I help prioritize the backlog by sizing impact. At Bang & Olufsen, I turned data into recommendations that commercial leads acted on. I'm looking to own more of those decisions. That's why ${company} caught my attention.`);
+            } else if (hasStakeholders) {
+                paragraphs.push(`The ${role} role at ${company} stood out because it's about influence, not just analysis. At Bang & Olufsen, I worked with market heads across five regions who disagreed on priorities. My job was to give them a shared view of what the data said. At Mytheresa, I'm the link between product and commercial when something breaks in the funnel.`);
             } else {
-                opening = `I came across the ${role} position at ${company} and saw a clear fit—not because my title matches, but because the problems you're trying to solve are ones I've spent four years learning to address.`;
+                paragraphs.push(`Four years turning ecommerce data into decisions. At Mytheresa, I run experimentation and funnel analytics. At Bang & Olufsen, I helped commercial teams across five markets figure out what was working. The ${role} role at ${company} looks like a place where that experience translates.`);
             }
 
-            // CONTEXT: Brief background that sets up the proof
-            let context = '';
+            // PROOF: One specific example with outcome
+            if (hasExperimentation) {
+                paragraphs.push(`Example: I ran a test at Mytheresa where the winning variant had higher conversion but lower repeat purchase rate. Everyone wanted to ship it. I showed the cohort data and argued for the "losing" variant. Three months later, that call was worth more in retained revenue than the conversion lift would have been. I'm good at finding those trade-offs.`);
+            } else if (hasCX || /feedback|support|customer/.test(jd)) {
+                paragraphs.push(`At Bang & Olufsen, I analyzed customer feedback and found our biggest drop-off wasn't where we thought. We were fixing checkout friction while the real problem was post-purchase communication. Fixing that moved CSAT from 65% to 85%. I look for the problem behind the problem.`);
+            } else if (hasFunnel) {
+                paragraphs.push(`At Mytheresa, when conversion drops, I figure out why. Last quarter I traced a 3% drop to a tracking bug miscounting mobile sessions. The week before, a similar drop was real—a payment issue in Germany. Knowing the difference saves time and money. I've built that instinct over four years.`);
+            } else if (hasStakeholders) {
+                paragraphs.push(`At Bang & Olufsen, five regional market heads all had different views on what the data meant. My job was to build alignment without watering down the findings. I learned to present trade-offs clearly enough that people could disagree with my recommendation but not with the facts.`);
+            } else if (hasPrioritization) {
+                paragraphs.push(`At Mytheresa, I'm often in the room when product decides what to fix. My job is to turn ten problems into two priorities. That means sizing impact, yes, but also knowing what's realistic to ship. Good prioritization is mostly about asking the right question.`);
+            } else {
+                paragraphs.push(`At Bang & Olufsen, I was asked why some markets outperformed others. Everyone assumed it was the campaigns. I dug in and found the real driver was inventory—we were advertising products we couldn't ship. That insight changed how commercial planning worked. I look for those non-obvious answers.`);
+            }
+
+            // VALUE PROP: What they get
             if (isPM) {
-                context = `My background is in product analytics and operations—at Mytheresa and Bang & Olufsen, I've been the person helping product teams figure out what to prioritize and why. I know how to frame problems, quantify trade-offs, and present recommendations that hold up to scrutiny. What I haven't had is direct ownership of the roadmap. That's the gap I'm looking to close.`;
-            } else if (isGrowth) {
-                context = `I've worked on the measurement side of growth for four years—funnels, experimentation, tracking, KPIs. At Mytheresa, I'm the one who figures out why conversion moved and what to do about it. At Bang & Olufsen, I helped commercial teams across five markets decide which initiatives to scale and which to cut. I understand how growth actually works, not just how to report on it.`;
+                paragraphs.push(`I don't have a traditional PM background. I'm coming from analytics. That means I won't make decisions based on gut and call it product sense. Every recommendation will have evidence behind it.`);
+            } else if (isGrowth || isMarketing) {
+                paragraphs.push(`What you'd get: someone who knows what actually drives growth versus what just feels productive. I've seen enough failed experiments to know that conviction without data is expensive.`);
+            } else if (isAnalyst) {
+                paragraphs.push(`What I add is the ability to turn analysis into action. I've worked with enough teams to know that insight without influence is just noise. I make sure my work changes decisions.`);
             } else {
-                context = `My background spans product analytics and operations across ecommerce—Mytheresa, Bang & Olufsen, reMarkable. I've worked on funnels, experimentation, and the messy process of turning data into decisions. My titles haven't always matched what I actually did, which was helping product and commercial teams figure out what matters and what to do about it.`;
+                paragraphs.push(`What I bring: the ability to connect data to decisions. Not dashboards and reports, but recommendations teams act on. I've done this across three companies in ecommerce.`);
             }
 
-            // PROOF: One specific, compelling example
-            let proof = '';
-            if (/experiment|a\/b|test/.test(jd)) {
-                proof = `Here's an example of how I work: at Mytheresa, I ran an A/B test where the variant everyone expected to win actually hurt downstream metrics—repeat purchase rate dropped. The aggregate conversion number looked good, but the cohort behavior told a different story. Presenting that finding required more than just showing data; I had to help stakeholders understand why the "losing" option was actually the right call. That ability to defend counterintuitive results—and build trust in the process—is something I'd bring to ${company}.`;
-            } else if (/prioriti|roadmap|backlog/.test(jd)) {
-                proof = `At Mytheresa, I'm often the person in the room when product teams are deciding what to fix next. My job is to turn a list of ten problems into a clear recommendation on which two actually matter. That means quantifying impact, yes, but also understanding constraints—what the team can realistically ship, what dependencies exist, what the business actually needs right now. I've learned that good prioritization is as much about framing the question as crunching the numbers.`;
-            } else if (/stakeholder|cross-functional/.test(jd)) {
-                proof = `At Bang & Olufsen, I worked with market heads across five regions—each with different priorities, different local contexts, and different ideas about what the data should say. I learned to translate insights into language that made sense for each audience, and to push back constructively when someone wanted the data to tell a story it didn't support. That experience—building alignment across stakeholders who don't report to each other—would transfer directly to this role.`;
-            } else if (/customer|user|experience|csat|nps/.test(jd)) {
-                proof = `At Bang & Olufsen, I led a project analyzing customer feedback across touchpoints. The quantitative data showed where drop-offs happened, but the qualitative feedback revealed why. We identified systemic issues that weren't obvious from metrics alone—and fixing them moved CSAT from 65% to 85%. That combination of qual and quant, and the persistence to follow problems to root causes, is something I'd bring to ${company}.`;
-            } else if (/funnel|conversion|drop-off/.test(jd)) {
-                proof = `At Mytheresa, I own the process of investigating funnel anomalies. When conversion drops, I'm the one figuring out whether it's a bug, a tracking issue, a seasonal pattern, or a real behavior change. That diagnostic work—and knowing how to prioritize what to fix based on actual impact—is something I've gotten good at. I'd bring that same rigor to understanding what's happening in ${company}'s funnel and what to do about it.`;
-            } else {
-                proof = `Here's how I tend to work: at Bang & Olufsen, I was asked to analyze campaign performance across global markets. Instead of just building a dashboard, I dug into why certain markets outperformed others—and found that the difference wasn't the campaigns, it was inventory availability affecting what we could actually sell. That insight changed how the commercial team thought about planning. I look for those non-obvious connections, and I'd bring that approach to ${company}.`;
-            }
-
-            // FIT: Why you + them specifically
-            let fit = '';
-            if (isPM) {
-                fit = `I know my path to product management is non-traditional—I'm coming from analytics, not a PM rotation or MBA. But I'd argue that's a strength. I won't make decisions based on intuition and call it "product sense." I'll make them based on evidence, and I'll be able to explain why. ${company} seems like a place that values that approach.`;
-            } else if (isGrowth) {
-                fit = `What I'd bring to ${company} is a clear-eyed view of what actually moves growth metrics versus what just feels productive. I've seen enough experiments fail to know that conviction without validation is expensive. And I've built the muscle to communicate trade-offs in a way that helps teams commit to a direction.`;
-            } else {
-                fit = `What I'd bring to this role is the ability to connect data to decisions—not just surface insights, but frame them in a way that leads to action. I've done this across multiple companies and contexts, and I'm looking for a place where that skill has real leverage. ${company} seems like that place.`;
-            }
-
-            // CLOSE: Confident, not groveling
-            const close = `I'd welcome a conversation about how my background fits what you're building.`;
+            // CLOSE: Confident, one line
+            paragraphs.push(`Let's talk.`);
 
             // ASSEMBLE
-            const letter = `Dear Hiring Team,
+            const letter = `Hi,
 
-${opening}
+${paragraphs.join('\n\n')}
 
-${context}
-
-${proof}
-
-${fit}
-
-${close}
-
-Best,
 Jan Skaaden
-janskaaden@gmail.com | +34 663 471 415
+janskaaden@gmail.com
++34 663 471 415
 linkedin.com/in/janskaaden`;
 
             document.getElementById('coverLetter').innerText = letter;
@@ -537,12 +419,10 @@ linkedin.com/in/janskaaden`;
             const role = document.getElementById('role').value.trim() || 'Role';
             const letterText = document.getElementById('coverLetter').innerText;
 
-            // Clean up names for filename
             const cleanCompany = company.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
             const cleanRole = role.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
             const filename = `Jan_Skaaden_${cleanCompany}_${cleanRole}.pdf`;
 
-            // Create a styled container for PDF
             const pdfContent = document.createElement('div');
             pdfContent.style.fontFamily = 'Georgia, serif';
             pdfContent.style.fontSize = '11pt';
@@ -552,7 +432,6 @@ linkedin.com/in/janskaaden`;
             pdfContent.style.color = '#1a1a1a';
             pdfContent.innerHTML = letterText.replace(/\n/g, '<br>');
 
-            // PDF options
             const opt = {
                 margin: [15, 20, 15, 20],
                 filename: filename,
@@ -561,7 +440,6 @@ linkedin.com/in/janskaaden`;
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // Generate and download
             html2pdf().set(opt).from(pdfContent).save();
         }
     </script>
